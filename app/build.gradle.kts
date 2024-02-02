@@ -61,6 +61,21 @@ dependencies {
 	implementation("androidx.compose.ui:ui-graphics")
 	implementation("androidx.compose.ui:ui-tooling-preview")
 	implementation("androidx.compose.material3:material3")
+	//play-service-ml
+	implementation("com.google.android.gms:play-services-mlkit-text-recognition:19.0.0")
+	//koin
+	implementation("io.insert-koin:koin-android:3.5.3")
+	implementation("io.insert-koin:koin-androidx-compose:3.5.3")
+	//coil
+	implementation("io.coil-kt:coil-compose:2.5.0")
+	//navigation
+	implementation("androidx.navigation:navigation-compose:2.7.6")
+	// kotlin -immutable
+	implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.7")
+	//lifecycle-runtime
+	implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
+	//splash
+	implementation("androidx.core:core-splashscreen:1.0.1")
 	// test
 	testImplementation("junit:junit:4.13.2")
 	// instrumented test
