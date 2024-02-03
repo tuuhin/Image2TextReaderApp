@@ -9,4 +9,9 @@
   <string name="retry_text">Retry</string>
   <string name="animation_label_top_bar">TopBar Animation</string>
   <string name="action_clear_selection">Clear Selection</string>
+  <string name="no_results">No Results Are Added</string>
+  <string name="no_results_desc">No previous results are computed add some to preview the results</string>
+  <string name="animation_label_results_list">Results List Animation</string>
+  <string name="image_for_content_uri">Content Uri %s</string>
+  <string name="recognize_screen_title">Recognized Text</string>
 </resources>

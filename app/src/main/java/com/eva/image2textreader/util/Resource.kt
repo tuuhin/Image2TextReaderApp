@@ -1,6 +1,6 @@
 package com.eva.image2textreader.util
 
-sealed interface Resource<T> {
+sealed interface Resource<out T> {
 
 	data class Success<T>(val data: T, val message: String? = null) : Resource<T>
 

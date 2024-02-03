@@ -2,6 +2,7 @@ package com.eva.image2textreader
 
 import android.app.Application
 import com.eva.image2textreader.di.appModule
+import com.eva.image2textreader.di.mlModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -12,7 +13,7 @@ class Image2TextReaderApp : Application() {
 	override fun onCreate() {
 		super.onCreate()
 
-		val modulesToInstall = listOf(appModule)
+		val modulesToInstall = listOf(appModule, mlModule)
 
 		startKoin {
 			androidLogger()
