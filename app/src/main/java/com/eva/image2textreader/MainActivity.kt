@@ -15,12 +15,13 @@ import com.eva.image2textreader.ui.theme.Image2TextReaderTheme
 class MainActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-
+		// splash screen
+		installSplashScreen()
+		// fill whole screen
 		WindowCompat.setDecorFitsSystemWindows(window, false)
 
-		installSplashScreen()
-
 		setContent {
+
 			val snackBarHost = remember { SnackbarHostState() }
 
 			Image2TextReaderTheme {

@@ -14,4 +14,21 @@
   <string name="animation_label_results_list">Results List Animation</string>
   <string name="image_for_content_uri">Content Uri %s</string>
   <string name="recognize_screen_title">Recognized Text</string>
+  <string name="text_metadata_line_count">Lines Count</string>
+  <string name="text_metadata_words_count">Words Count</string>
+  <string name="text_metadata_recognized_language">Recognized Language</string>
+  <string name="extracting_text">Extracting Text</string>
+  <string name="no_history_found">No History Found</string>
+  <string name="export_as_text">Export Text</string>
+  <string name="export_as_pdf">Export PDF</string>
+  <string name="delete_selected">Delete Selected</string>
+  <string name="delete_text">Delete</string>
+  <string name="dialog_cancel_text">Cancel</string>
+  <string name="delete_selected_confirm_title">Are you sure you want to delete selected items?</string>
+  <string name="delete_selected_confirm_text">Delete the selected ones, on deleting them you cannot retrieve any on them be decisive in your descision</string>
+  <string name="share_results_title">Share Results</string>
+  <string name="delete_current_confirm_title">Are you sure you want to delete this result?</string>
+  <string name="delete_current_confirm_text">Do you really want to delete this old result</string>
+  <string name="select_all">Select All</string>
+  <string name="computation_result">Computation result: %d</string>
 </resources>

@@ -2,6 +2,7 @@ package com.eva.image2textreader.presentation.navigation
 
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
@@ -17,7 +18,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.eva.image2textreader.R
 import com.eva.image2textreader.presentation.feature_results.ResultsScreen
 import com.eva.image2textreader.presentation.feature_results.ResultsViewModel
 import com.eva.image2textreader.presentation.util.compLocal.LocalSnackBarProvider
@@ -35,16 +35,17 @@ fun NavigationGraph(
 
 	NavHost(
 		navController = controller,
-		startDestination = Screens.Resents.route,
+		startDestination = Screens.ResultsScreen.route,
 		modifier = modifier,
 	) {
-		composable(route = Screens.Resents.route) {
+		composable(route = Screens.ResultsScreen.route) {
 
 			val viewModel = koinViewModel<ResultsViewModel>()
 
 			val savedResults by viewModel.savedResults.collectAsStateWithLifecycle()
 
 			val selectedResults by viewModel.selectedResults.collectAsStateWithLifecycle()
+
 
 			LaunchedEffect(key1 = lifeCycleOwner) {
 				lifeCycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -53,10 +54,11 @@ fun NavigationGraph(
 							is UiEvents.ShowSnackBar -> {
 								val results = snackBarHost.showSnackbar(
 									message = event.text,
-									actionLabel = context.getString(R.string.retry_text)
+									actionLabel = event.actionLabel,
+									duration = SnackbarDuration.Short
 								)
 								when (results) {
-									SnackbarResult.ActionPerformed -> event.action.invoke()
+									SnackbarResult.ActionPerformed -> event.action?.invoke()
 									else -> {}
 								}
 							}
@@ -72,13 +74,19 @@ fun NavigationGraph(
 
 			ResultsScreen(
 				results = savedResults,
-				onPickImage = {},
+				onPickImage = { uri ->
+
+				},
 				onClick = {},
 				onLongClick = viewModel::onSelectResult,
-				onUnSelect = viewModel::clearAllSelection,
+				onUnSelectAll = viewModel::clearAllSelection,
 				selectedCount = selectedResults.size,
 				onDeleteSelected = viewModel::onDeleteSelected,
+				onDeleteResult = viewModel::onDeleteResult,
+				onSelectAll = viewModel::onSelectAll
 			)
 		}
+
+
 	}
 }

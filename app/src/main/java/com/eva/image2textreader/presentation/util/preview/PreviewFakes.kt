@@ -1,7 +1,9 @@
 package com.eva.image2textreader.presentation.util.preview
 
+import com.eva.image2textreader.domain.models.RecognizedTextModel
 import com.eva.image2textreader.domain.models.ResultsModel
-import java.time.LocalDateTime
+import com.eva.image2textreader.util.now
+import kotlinx.datetime.LocalDateTime
 
 object PreviewFakes {
 	val fakeResultModel = ResultsModel(
@@ -10,6 +12,14 @@ object PreviewFakes {
 		lastUpdated = LocalDateTime.now()
 	)
 
-	val fakeResultsModelList = List(20) { fakeResultModel.copy(id = it) }
+	val fakeResultsModelList = List(20) { fakeResultModel.copy(id = it.toLong()) }
+
+	val fakeRecognizedTextModel = RecognizedTextModel(
+		wholeText = "This is a very long text",
+		languageCode = null,
+		linesCount = 1,
+		wordsCount = 6,
+		lines = listOf("This is a very long text")
+	)
 
 }

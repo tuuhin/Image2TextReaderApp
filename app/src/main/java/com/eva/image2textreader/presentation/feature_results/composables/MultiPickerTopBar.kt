@@ -1,6 +1,7 @@
 package com.eva.image2textreader.presentation.feature_results.composables
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandIn
 import androidx.compose.animation.shrinkOut
@@ -14,6 +15,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PlainTooltipBox
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -22,7 +24,9 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,13 +47,28 @@ fun MultiPickerTopBar(
 	selectedCount: Int = 0,
 	onClearSelected: () -> Unit,
 	onDeleteSelected: () -> Unit,
+	onSelectAll: () -> Unit,
 	scrollBehavior: TopAppBarScrollBehavior? = null,
-	containerColor: Color = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
-	scrollableContainerColor: Color = MaterialTheme.colorScheme.primaryContainer
+	selectedTopBarContainerColor: Color = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
+	scrollableContainerColor: Color = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
 ) {
 
 	val selectedResultsCount by remember(selectedCount) {
 		derivedStateOf { "$selectedCount" }
+	}
+
+	var showDialog by remember { mutableStateOf(false) }
+
+	if (showDialog) {
+		DeleteResultsDialog(
+			text = stringResource(id = R.string.delete_selected_confirm_title),
+			title = stringResource(id = R.string.delete_selected_confirm_text),
+			onConfirm = {
+				onDeleteSelected()
+				showDialog = false
+			},
+			onDisMiss = { showDialog = false },
+		)
 	}
 
 	AnimatedContent(
@@ -59,7 +78,7 @@ fun MultiPickerTopBar(
 		transitionSpec = {
 
 			val enterIn = expandIn(
-				animationSpec = tween(durationMillis = 300),
+				animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
 				expandFrom = Alignment.TopCenter
 			) + slideInVertically(
 				animationSpec = tween(durationMillis = 400),
@@ -67,7 +86,7 @@ fun MultiPickerTopBar(
 			)
 
 			val exitOut = shrinkOut(
-				animationSpec = tween(durationMillis = 300),
+				animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
 				shrinkTowards = Alignment.TopCenter
 			) + slideOutVertically(
 				animationSpec = tween(durationMillis = 400),
@@ -77,12 +96,11 @@ fun MultiPickerTopBar(
 			enterIn togetherWith exitOut
 		},
 		contentAlignment = Alignment.Center,
-	) { show ->
-		if (show) TopAppBar(
+	) { isMultiSelectTopBar ->
+		if (isMultiSelectTopBar) TopAppBar(
 			title = {
 				Text(
-					text = selectedResultsCount,
-					style = MaterialTheme.typography.headlineSmall
+					text = selectedResultsCount, style = MaterialTheme.typography.headlineSmall
 				)
 			},
 			navigationIcon = {
@@ -93,16 +111,37 @@ fun MultiPickerTopBar(
 					)
 				}
 			},
-			scrollBehavior = scrollBehavior,
 			actions = {
-				IconButton(onClick = onDeleteSelected) {
-					Icon(
-						painter = painterResource(id = R.drawable.ic_delete),
-						contentDescription = stringResource(R.string.delete_icon_desc)
-					)
+				PlainTooltipBox(
+					tooltip = { Text(text = stringResource(id = R.string.select_all)) },
+				) {
+					IconButton(
+						onClick = onSelectAll,
+						modifier = Modifier.tooltipAnchor(),
+					) {
+						Icon(
+							painter = painterResource(id = R.drawable.ic_check_all),
+							contentDescription = stringResource(R.string.select_all)
+						)
+					}
+				}
+				PlainTooltipBox(
+					tooltip = { Text(text = stringResource(id = R.string.delete_selected)) },
+				) {
+					IconButton(
+						onClick = { showDialog = true },
+						modifier = Modifier.tooltipAnchor()
+					) {
+						Icon(
+							painter = painterResource(id = R.drawable.ic_delete),
+							contentDescription = stringResource(R.string.delete_icon_desc)
+						)
+					}
 				}
 			},
-			colors = TopAppBarDefaults.topAppBarColors(containerColor = containerColor),
+			scrollBehavior = scrollBehavior,
+			colors = TopAppBarDefaults
+				.topAppBarColors(containerColor = selectedTopBarContainerColor),
 		)
 		else CenterAlignedTopAppBar(
 			title = { Text(text = stringResource(id = R.string.app_name)) },
@@ -117,13 +156,11 @@ fun MultiPickerTopBar(
 @PreviewLightDark
 @Composable
 fun MultiPickerTopBarPreview(
-	@PreviewParameter(BooleanPreviewParams::class)
-	showSelected: Boolean
+	@PreviewParameter(BooleanPreviewParams::class) showSelected: Boolean
 ) = Image2TextReaderTheme {
-	MultiPickerTopBar(
-		selectedCount = 10,
+	MultiPickerTopBar(selectedCount = 10,
 		isItemSelected = showSelected,
 		onClearSelected = { },
 		onDeleteSelected = { },
-	)
+		onSelectAll = {})
 }
