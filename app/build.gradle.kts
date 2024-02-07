@@ -1,6 +1,7 @@
 plugins {
 	id("com.android.application")
 	id("org.jetbrains.kotlin.android")
+	id("app.cash.sqldelight") version "2.0.1"
 }
 
 android {
@@ -70,12 +71,18 @@ dependencies {
 	implementation("io.coil-kt:coil-compose:2.5.0")
 	//navigation
 	implementation("androidx.navigation:navigation-compose:2.7.6")
+	// kotlin -datetime
+	implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
 	// kotlin -immutable
 	implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.7")
 	//lifecycle-runtime
 	implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
 	//splash
 	implementation("androidx.core:core-splashscreen:1.0.1")
+	//sql-delight-android-driver
+	implementation("app.cash.sqldelight:android-driver:2.0.1")
+	implementation("app.cash.sqldelight:coroutines-extensions:2.0.1")
+	implementation("app.cash.sqldelight:primitive-adapters:2.0.0-alpha05")
 	// test
 	testImplementation("junit:junit:4.13.2")
 	// instrumented test
@@ -86,4 +93,12 @@ dependencies {
 	//debug
 	debugImplementation("androidx.compose.ui:ui-tooling")
 	debugImplementation("androidx.compose.ui:ui-test-manifest")
+}
+
+sqldelight {
+	databases {
+		create("AppDataBase") {
+			packageName.set("com.eva")
+		}
+	}
 }

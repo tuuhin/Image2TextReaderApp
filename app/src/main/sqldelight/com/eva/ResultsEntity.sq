@@ -1,0 +1,10 @@
+import kotlinx.datetime.LocalDateTime;
+
+CREATE TABLE resultsEntity (
+    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    `text` TEXT NOT NULL,
+    `image_uri` TEXT,
+    `computed_at` TEXT AS LocalDateTime NOT NULL,
+    `updated_at` TEXT AS LocalDateTime,
+    `language_code` TEXT
+);
