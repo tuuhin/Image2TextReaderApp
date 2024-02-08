@@ -6,5 +6,5 @@ interface ImageFileSaver {
 
 	suspend fun deleteFile(uriString: String): Boolean
 
-	suspend fun deleteFiles(uriStrings: List<String>): Boolean
+	suspend fun deleteFiles(uriStrings: Collection<String>): Boolean
 }

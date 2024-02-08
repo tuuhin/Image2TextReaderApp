@@ -45,10 +45,9 @@ class InternalImageSaverImpl(
 			directory.listFiles(fileFilter)
 				?.firstOrNull()
 				?.let { file ->
-					if (file.exists()) {
-						Log.d(FILE_CACHE_LOGGER, "FILE_FOUND_RETURNING_FROM_CACHE")
-						return@withContext file.toContentUri().toString()
-					}
+					if (!file.exists()) return@let
+					Log.d(FILE_CACHE_LOGGER, "FILE_EXITS NAME ${file.name}")
+					return@withContext file.toContentUri().toString()
 				}
 
 			val file = File(directory, fileName)
@@ -79,7 +78,7 @@ class InternalImageSaverImpl(
 					?.let { file ->
 						if (!file.exists()) return@let
 						val operation = file.delete()
-						Log.d(FILE_CACHE_LOGGER, "DELETE_OP : $operation")
+						Log.d(FILE_CACHE_LOGGER, "DELETE_FILE ${file.name} RESULT : $operation")
 						return@withContext operation
 					}
 				false
@@ -90,7 +89,7 @@ class InternalImageSaverImpl(
 		}
 	}
 
-	override suspend fun deleteFiles(uriStrings: List<String>): Boolean {
+	override suspend fun deleteFiles(uriStrings: Collection<String>): Boolean {
 		return withContext(Dispatchers.IO) {
 			try {
 				val lastSegments = uriStrings.map(String::toUri)
@@ -101,7 +100,11 @@ class InternalImageSaverImpl(
 				val deferredOps = directory.listFiles(filter)
 					?.mapNotNull { file ->
 						if (!file.exists()) return@mapNotNull null
-						return@mapNotNull async { file.delete() }
+						return@mapNotNull async {
+							val res = file.delete()
+							Log.d(FILE_CACHE_LOGGER, "DELETED FILE ${file.name} RESULT: $res")
+							res
+						}
 					} ?: return@withContext false
 
 				return@withContext deferredOps.awaitAll().all { it }

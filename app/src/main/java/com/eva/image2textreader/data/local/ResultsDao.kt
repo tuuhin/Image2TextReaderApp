@@ -18,4 +18,6 @@ interface ResultsDao {
 	suspend fun deleteResults(vararg entities: ResultsEntity)
 
 	suspend fun isUriSHared(uri: String): Boolean
+
+	suspend fun calculateCommonUriToDelete(entities: List<ResultsEntity>): Set<String>
 }

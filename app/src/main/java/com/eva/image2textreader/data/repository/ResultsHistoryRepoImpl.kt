@@ -83,14 +83,12 @@ class ResultsHistoryRepoImpl(
 		return withContext(Dispatchers.IO) {
 			try {
 				val entity = mapper.toEntity(result)
+				//Calculate if SharedUri then return url
+				val isShared = result.imageUri?.let { resultsDao.isUriSHared(it) }
 				// delete the entity
 				resultsDao.deleteResult(entity)
-				//delete the file
-				result.imageUri?.let {
-					val isShared = resultsDao.isUriSHared(it)
-					if (isShared) return@let
-					fileSaver.deleteFile(it)
-				}
+				//Delete the file if it's not shared otherwise do nothing
+				if (isShared == false) fileSaver.deleteFile(result.imageUri)
 				Resource.Success(true)
 			} catch (e: SQLiteException) {
 				e.printStackTrace()
@@ -103,17 +101,26 @@ class ResultsHistoryRepoImpl(
 	}
 
 	override suspend fun deleteResults(results: List<ResultsModel>): Resource<Boolean> {
-		return try {
-			val entities = results.map(mapper::toEntity).toTypedArray()
-			resultsDao.deleteResults(*entities)
-			// TODO: IMPLEMENT DELETE FILES FOR GROUP DELETE
-			Resource.Success(true)
-		} catch (e: SQLiteException) {
-			e.printStackTrace()
-			Resource.Error(message = e.message ?: "SQL_INTERNAL_ERROR")
-		} catch (e: Exception) {
-			e.printStackTrace()
-			Resource.Error(message = e.message ?: "")
+		return withContext(Dispatchers.IO) {
+			try {
+				val entities = results.map(mapper::toEntity)
+				val entitiesArray = entities.toTypedArray()
+				// Calculate the uris to be deleted
+				val uris = async { resultsDao.calculateCommonUriToDelete(entities) }.await()
+				// Then delete the results
+				resultsDao.deleteResults(*entitiesArray)
+				//then delete the files
+				val operation = async { fileSaver.deleteFiles(uris) }
+				operation.await()
+				// Then it's a success
+				Resource.Success(true)
+			} catch (e: SQLiteException) {
+				e.printStackTrace()
+				Resource.Error(message = e.message ?: "SQL_INTERNAL_ERROR")
+			} catch (e: Exception) {
+				e.printStackTrace()
+				Resource.Error(message = e.message ?: "")
+			}
 		}
 	}
 

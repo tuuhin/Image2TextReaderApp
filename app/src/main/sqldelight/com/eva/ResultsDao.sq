@@ -25,3 +25,7 @@ INSERT OR REPLACE INTO resultsEntity VALUES  ?;
 countSharedUriNumber:
 SELECT COUNT(*) FROM resultsEntity
 WHERE `image_uri` IS NOT NULL AND  `image_uri` =?;
+
+provideCountOfImageUris:
+SELECT COUNT(`image_uri`) AS count,`image_uri` FROM resultsEntity
+WHERE `image_uri` IN ? GROUP BY `image_uri`;

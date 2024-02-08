@@ -60,5 +60,23 @@ class ResultsDaoImpl(database: AppDataBase) : ResultsDao {
 				?.let { result -> result > 1 } ?: false
 		}
 
+	override suspend fun calculateCommonUriToDelete(entities: List<ResultsEntity>): Set<String> =
+		withContext(Dispatchers.IO) {
+			val imageUris = entities.mapNotNull { it.image_uri }
+			dbQueries.provideCountOfImageUris(imageUris)
+				.executeAsList()
+				.mapNotNull { results ->
+					// How many tuple shared the common uri
+					val sharedCount = results.count.toInt()
+					// How many images to be deleted shared the common uri
+					val filteredCount = imageUris.count { it == results.image_uri }
+					// If the number is same delete those
+					if (sharedCount == filteredCount) return@mapNotNull results.image_uri
+					else null
+				}
+				// Convert to set as we don't want common uris
+				.toSet()
+		}
+
 
 }
