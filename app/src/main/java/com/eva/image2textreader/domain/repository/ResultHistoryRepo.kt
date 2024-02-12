@@ -8,6 +8,8 @@ interface ResultHistoryRepo {
 
 	fun resultsFlow(): Flow<Resource<List<ResultsModel>>>
 
+	suspend fun resultsFromId(id: Long): Flow<Resource<ResultsModel?>>
+
 	suspend fun addNewResult(result: ResultsModel): Resource<Boolean>
 
 	suspend fun updateResult(result: ResultsModel): Resource<Boolean>

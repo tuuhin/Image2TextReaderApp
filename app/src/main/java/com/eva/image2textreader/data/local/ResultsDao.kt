@@ -9,6 +9,8 @@ interface ResultsDao {
 
 	val resultsAsList: List<ResultsEntity>
 
+	suspend fun resultFromId(id: Long): ResultsEntity?
+
 	suspend fun insertResult(entity: ResultsEntity)
 
 	suspend fun updateResult(entity: ResultsEntity)

@@ -21,6 +21,11 @@ class ResultsDaoImpl(database: AppDataBase) : ResultsDao {
 		get() = dbQueries.selectAllResults()
 			.executeAsList()
 
+	override suspend fun resultFromId(id: Long): ResultsEntity? =
+		dbQueries.selectResultFromId(id)
+			.executeAsOneOrNull()
+
+
 	override suspend fun insertResult(entity: ResultsEntity) =
 		withContext(Dispatchers.IO) {
 			dbQueries.insetResult(
@@ -77,6 +82,4 @@ class ResultsDaoImpl(database: AppDataBase) : ResultsDao {
 				// Convert to set as we don't want common uris
 				.toSet()
 		}
-
-
 }

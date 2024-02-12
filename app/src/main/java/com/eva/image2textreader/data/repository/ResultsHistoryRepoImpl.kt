@@ -12,12 +12,12 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class ResultsHistoryRepoImpl(
 	private val resultsDao: ResultsDao,
-	private val mapper: ResultsModelEntityMapper,
 	private val fileSaver: ImageFileSaver,
 ) : ResultHistoryRepo {
 
@@ -26,7 +26,7 @@ class ResultsHistoryRepoImpl(
 			emit(Resource.Loading)
 			try {
 				val results = resultsDao.resultsAsFlow.map { entities ->
-					val models = entities.map(mapper::toModel)
+					val models = entities.map(ResultsModelEntityMapper::toModel)
 					Resource.Success(data = models)
 				}
 				emitAll(results)
@@ -51,7 +51,7 @@ class ResultsHistoryRepoImpl(
 					deferredSave.await()
 				}
 				//save the entity
-				val entity = mapper.toEntity(model = result, imageUri = uri)
+				val entity = ResultsModelEntityMapper.toEntity(model = result, imageUri = uri)
 				resultsDao.insertResult(entity)
 				Resource.Success(true)
 			} catch (e: SQLiteException) {
@@ -67,7 +67,7 @@ class ResultsHistoryRepoImpl(
 	override suspend fun updateResult(result: ResultsModel): Resource<Boolean> {
 		return try {
 			// update the content but images are constant
-			val entity = mapper.toEntity(model = result)
+			val entity = ResultsModelEntityMapper.toEntity(model = result)
 			resultsDao.updateResult(entity)
 			Resource.Success(true)
 		} catch (e: SQLiteException) {
@@ -82,7 +82,7 @@ class ResultsHistoryRepoImpl(
 	override suspend fun deleteResult(result: ResultsModel): Resource<Boolean> {
 		return withContext(Dispatchers.IO) {
 			try {
-				val entity = mapper.toEntity(result)
+				val entity = ResultsModelEntityMapper.toEntity(result)
 				//Calculate if SharedUri then return url
 				val isShared = result.imageUri?.let { resultsDao.isUriSHared(it) }
 				// delete the entity
@@ -103,7 +103,7 @@ class ResultsHistoryRepoImpl(
 	override suspend fun deleteResults(results: List<ResultsModel>): Resource<Boolean> {
 		return withContext(Dispatchers.IO) {
 			try {
-				val entities = results.map(mapper::toEntity)
+				val entities = results.map(ResultsModelEntityMapper::toEntity)
 				val entitiesArray = entities.toTypedArray()
 				// Calculate the uris to be deleted
 				val uris = async { resultsDao.calculateCommonUriToDelete(entities) }.await()
@@ -122,6 +122,23 @@ class ResultsHistoryRepoImpl(
 				Resource.Error(message = e.message ?: "")
 			}
 		}
+	}
+
+	override suspend fun resultsFromId(id: Long): Flow<Resource<ResultsModel?>> {
+		return flow {
+			emit(Resource.Loading)
+			try {
+				val model = resultsDao.resultFromId(id)?.let(ResultsModelEntityMapper::toModel)
+				emit(Resource.Success(data = model))
+			} catch (e: SQLiteException) {
+				e.printStackTrace()
+				emit(Resource.Error(message = e.message ?: "SQL_INTERNAL_ERROR"))
+			} catch (e: Exception) {
+				e.printStackTrace()
+				emit(Resource.Error(message = e.message ?: ""))
+			}
+		}.flowOn(Dispatchers.IO)
+
 	}
 
 

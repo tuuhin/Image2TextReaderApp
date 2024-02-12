@@ -5,7 +5,7 @@ import com.eva.image2textreader.domain.models.ResultsModel
 import com.eva.image2textreader.util.now
 import kotlinx.datetime.LocalDateTime
 
-class ResultsModelEntityMapper {
+object ResultsModelEntityMapper {
 
 	fun toModel(entity: ResultsEntity): ResultsModel {
 
