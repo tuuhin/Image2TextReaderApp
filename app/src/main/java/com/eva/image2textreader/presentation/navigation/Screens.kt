@@ -13,6 +13,10 @@ sealed class Screens(val route: String) {
 			val encodedUri = URLEncoder.encode("$uri", Charsets.UTF_8.name())
 			navController.navigate("/recognize/$encodedUri")
 		}
+
+		fun navigateToEditScreen(navController: NavController, resultId: Long) {
+			navController.navigate("/edit/$resultId")
+		}
 	}
 
 	data object RecognizeScreen : Screens("/recognize/{${NavParams.URI_PATH_PARAM}}") {
@@ -23,6 +27,15 @@ sealed class Screens(val route: String) {
 				nullable = false
 			},
 		)
+	}
 
+	data object EditScreen : Screens("/edit/{${NavParams.RESULT_ID}}") {
+
+		val navArgs = listOf(
+			navArgument(name = NavParams.RESULT_ID) {
+				type = NavType.LongType
+				nullable = false
+			}
+		)
 	}
 }

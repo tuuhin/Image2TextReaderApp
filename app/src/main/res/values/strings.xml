@@ -31,4 +31,9 @@
   <string name="delete_current_confirm_text">Do you really want to delete this old result</string>
   <string name="select_all">Select All</string>
   <string name="computation_result">Computation result: %d</string>
+  <string name="edit_screen">Edit Screen</string>
+  <string name="edit_confirm_dialog_title">Have you completed your changes?</string>
+  <string name="edit_confirm_dialog_text">"Are the changes to the recognized text are completed "</string>
+  <string name="dialog_done_text">Done</string>
+  <string name="image_preview_title">Preview Image With</string>
 </resources>
