@@ -17,9 +17,8 @@ object PreviewFakes {
 	val fakeRecognizedTextModel = RecognizedTextModel(
 		wholeText = "This is a very long text",
 		languageCode = null,
-		linesCount = 1,
-		wordsCount = 6,
-		lines = listOf("This is a very long text")
+		linesText = emptyList(),
+		textBlocksText = emptyList()
 	)
 
 }

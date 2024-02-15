@@ -5,6 +5,7 @@ import com.eva.image2textreader.domain.models.RecognizedTextModel
 import com.eva.image2textreader.util.Resource
 import com.google.mlkit.common.MlKitException
 import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.Text.Line
 import com.google.mlkit.vision.text.Text.TextBlock
 import com.google.mlkit.vision.text.TextRecognizer
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -20,10 +21,18 @@ class ImageToTextRecognizerImpl(
 				addOnCompleteListener {
 
 					addOnSuccessListener { text ->
+
+						val language = text.textBlocks
+							.firstOrNull { it.recognizedLanguage != "und" }
+							?.recognizedLanguage
+
 						val recognizedText = RecognizedTextModel(
 							wholeText = text.text,
-							lines = text.textBlocks.map(TextBlock::getText),
-							languageCode = text.textBlocks.firstOrNull()?.recognizedLanguage
+							textBlocksText = text.textBlocks.map(TextBlock::getText),
+							languageCode = language,
+							linesText = text.textBlocks.map { block ->
+								block.lines.map(Line::getText)
+							}.flatten(),
 						)
 						val success = Resource.Success(data = recognizedText)
 						cont.resume(success)
@@ -36,12 +45,10 @@ class ImageToTextRecognizerImpl(
 						if (exception is MlKitException) cont.cancel(exception)
 						else cont.resume(error)
 					}
-
 				}
 
 				addOnCanceledListener(cont::cancel)
 			}
-
 		}
 	}
 

@@ -26,7 +26,6 @@ import com.eva.image2textreader.presentation.feature_edit.EditResultScreen
 import com.eva.image2textreader.presentation.feature_edit.EditResultsViewModel
 import com.eva.image2textreader.presentation.feature_recognizer.RecognizerScreen
 import com.eva.image2textreader.presentation.feature_recognizer.RecognizerViewModel
-import com.eva.image2textreader.presentation.feature_recognizer.composables.LoadingContentDialog
 import com.eva.image2textreader.presentation.feature_results.ResultsScreen
 import com.eva.image2textreader.presentation.feature_results.ResultsViewModel
 import com.eva.image2textreader.presentation.util.compLocal.LocalSnackBarProvider
@@ -135,14 +134,11 @@ fun NavigationGraph(
 				}
 			}
 
-			//transition is complete and recognize is not complete
-			LoadingContentDialog(isVisible = !isComputationComplete && !transition.isRunning)
-
 			val imageUri = backstack.arguments?.getString(NavParams.URI_PATH_PARAM)
 
 			RecognizerScreen(
-				model = recognizerModel,
 				imageUri = imageUri,
+				model = recognizerModel,
 				isContentReady = isComputationComplete,
 				onBack = viewModel::onBackPressEvent,
 				navigation = {

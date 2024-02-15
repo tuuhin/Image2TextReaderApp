@@ -1,6 +1,7 @@
 package com.eva.image2textreader.presentation.util.preview
 
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
+import com.eva.image2textreader.domain.models.ResultsModel
 import com.eva.image2textreader.presentation.feature_results.util.ResultsState
 import com.eva.image2textreader.presentation.util.ShowContent
 
@@ -29,5 +30,13 @@ class ResultsShowContentPreviewParams :
 				isLoading = false,
 				content = PreviewFakes.fakeResultsModelList.map(::ResultsState)
 			),
+		)
+	)
+
+class ResultsShowContentSinglePreviewParams :
+	CollectionPreviewParameterProvider<ShowContent<ResultsModel?>>(
+		listOf(
+			ShowContent(isLoading = true, content = null),
+			ShowContent(isLoading = false, content = PreviewFakes.fakeResultModel)
 		)
 	)

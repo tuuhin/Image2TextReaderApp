@@ -37,7 +37,7 @@ class ResultsHistoryRepoImpl(
 				e.printStackTrace()
 				emit(Resource.Error(message = e.message ?: ""))
 			}
-		}
+		}.flowOn(Dispatchers.IO)
 	}
 
 	override suspend fun addNewResult(result: ResultsModel): Resource<Boolean> {
