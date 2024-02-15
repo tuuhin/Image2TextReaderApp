@@ -36,4 +36,9 @@
   <string name="edit_confirm_dialog_text">"Are the changes to the recognized text are completed "</string>
   <string name="dialog_done_text">Done</string>
   <string name="image_preview_title">Preview Image With</string>
+
+  <string name="notification_title">Export</string>
+  <string name="notification_ticker_text">Exporting File</string>
+  <string name="notification_content_text">Exporting your file It May take some Time</string>
+  <string name="download_icon_text">Export</string>
 </resources>

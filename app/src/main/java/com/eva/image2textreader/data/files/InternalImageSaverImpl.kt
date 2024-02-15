@@ -1,6 +1,5 @@
-package com.eva.image2textreader.data.image
+package com.eva.image2textreader.data.files
 
-import android.content.ContentUris
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -8,6 +7,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
+import com.eva.image2textreader.domain.fs.ImageFileSaver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -15,6 +15,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileFilter
 import java.io.FileOutputStream
+import kotlin.random.Random
 
 private const val FILE_CACHE_LOGGER = "FILE_LOGGER"
 
@@ -30,10 +31,16 @@ class InternalImageSaverImpl(
 			if (!exists()) mkdirs()
 		}
 
+	private val randomId: Int
+		get() = Random(100).nextInt()
+
 	override suspend fun saveFileFromContentUri(uriString: String, quality: Int): String? {
 
 		val uri = uriString.toUri()
-		val uriId = ContentUris.parseId(uri)
+		// Takes the last segment mostly ends with digits convert it to int otherwise a randomId
+		val uriId = uri.lastPathSegment?.takeLastWhile(Char::isDigit)
+			?.toIntOrNull() ?: randomId
+
 		val fileName = "file-$uriId.png"
 
 		val fileFilter = FileFilter { file ->
@@ -52,15 +59,20 @@ class InternalImageSaverImpl(
 
 			val file = File(directory, fileName)
 
-			context.contentResolver.openInputStream(uri)
-				?.use { stream ->
-					val bitmap = BitmapFactory.decodeStream(stream)
-					FileOutputStream(file).use { outputStream ->
-						Log.d(FILE_CACHE_LOGGER, "FILE_WRITTEN")
-						bitmap.compress(Bitmap.CompressFormat.PNG, quality, outputStream)
+			try {
+				context.contentResolver.openInputStream(uri)
+					?.use { stream ->
+						val bitmap = BitmapFactory.decodeStream(stream)
+						FileOutputStream(file).use { outputStream ->
+							Log.d(FILE_CACHE_LOGGER, "FILE_WRITTEN")
+							bitmap.compress(Bitmap.CompressFormat.PNG, quality, outputStream)
+						}
 					}
-				}
-			file.toContentUri().toString()
+				file.toContentUri().toString()
+			} catch (e: Exception) {
+				e.printStackTrace()
+				null
+			}
 		}
 	}
 

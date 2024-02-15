@@ -1,4 +1,4 @@
-package com.eva.image2textreader.data.image
+package com.eva.image2textreader.domain.fs
 
 interface ImageFileSaver {
 

@@ -84,6 +84,8 @@ dependencies {
 	implementation("app.cash.sqldelight:android-driver:2.0.1")
 	implementation("app.cash.sqldelight:coroutines-extensions:2.0.1")
 	implementation("app.cash.sqldelight:primitive-adapters:2.0.0-alpha05")
+	//worker
+	implementation("androidx.work:work-runtime-ktx:2.9.0")
 	// test
 	testImplementation("junit:junit:4.13.2")
 	// instrumented test

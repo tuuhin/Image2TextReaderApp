@@ -1,9 +1,9 @@
 package com.eva.image2textreader.data.repository
 
 import android.database.sqlite.SQLiteException
-import com.eva.image2textreader.data.image.ImageFileSaver
 import com.eva.image2textreader.data.local.ResultsDao
 import com.eva.image2textreader.data.mapper.ResultsModelEntityMapper
+import com.eva.image2textreader.domain.fs.ImageFileSaver
 import com.eva.image2textreader.domain.models.ResultsModel
 import com.eva.image2textreader.domain.repository.ResultHistoryRepo
 import com.eva.image2textreader.util.Resource
