@@ -15,11 +15,11 @@ import com.eva.image2textreader.R
 import com.eva.image2textreader.ui.theme.Image2TextReaderTheme
 
 @Composable
-fun EditConfirmDialog(
+fun ExportFileDialog(
 	isVisible: Boolean,
-	onConfirm: () -> Unit,
 	onDismiss: () -> Unit,
-	modifier: Modifier = Modifier,
+	onConfirm: () -> Unit,
+	modifier: Modifier = Modifier
 ) {
 	if (!isVisible) return
 
@@ -31,7 +31,7 @@ fun EditConfirmDialog(
 				colors = ButtonDefaults
 					.textButtonColors(contentColor = MaterialTheme.colorScheme.secondary)
 			) {
-				Text(text = stringResource(id = R.string.dialog_done_text))
+				Text(text = stringResource(id = R.string.export_as_text))
 			}
 		},
 		dismissButton = {
@@ -43,8 +43,8 @@ fun EditConfirmDialog(
 				Text(text = stringResource(id = R.string.dialog_cancel_text))
 			}
 		},
-		title = { Text(text = stringResource(id = R.string.edit_confirm_dialog_title)) },
-		text = { Text(text = stringResource(id = R.string.edit_confirm_dialog_text)) },
+		title = { Text(text = stringResource(id = R.string.export_text_dialog_title)) },
+		text = { Text(text = stringResource(id = R.string.export_text_dialog_text)) },
 		shape = MaterialTheme.shapes.extraLarge,
 		properties = DialogProperties(dismissOnBackPress = true, dismissOnClickOutside = false),
 		modifier = modifier,
@@ -60,6 +60,6 @@ fun EditConfirmDialog(
 	uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
 )
 @Composable
-fun EditConfirmDialogPreview() = Image2TextReaderTheme {
-	EditConfirmDialog(isVisible = true, onConfirm = {}, onDismiss = {})
+fun ExportFileDialogPreview() = Image2TextReaderTheme(dynamicColor = false) {
+	ExportFileDialog(isVisible = true, onDismiss = {}, onConfirm = {})
 }

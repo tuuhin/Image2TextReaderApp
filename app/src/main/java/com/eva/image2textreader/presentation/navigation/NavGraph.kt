@@ -136,7 +136,7 @@ fun NavigationGraph(
 			}
 
 			//transition is complete and recognize is not complete
-			if (!transition.isRunning && !isComputationComplete) LoadingContentDialog()
+			LoadingContentDialog(isVisible = !isComputationComplete && !transition.isRunning)
 
 			val imageUri = backstack.arguments?.getString(NavParams.URI_PATH_PARAM)
 
@@ -164,6 +164,7 @@ fun NavigationGraph(
 			val viewModel = koinViewModel<EditResultsViewModel>()
 
 			val resultsAsContent by viewModel.resultAsContent.collectAsStateWithLifecycle()
+			val fileSaverState by viewModel.fileDownloadState.collectAsStateWithLifecycle()
 
 			LaunchedEffect(key1 = lifeCycleOwner) {
 				lifeCycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -193,6 +194,8 @@ fun NavigationGraph(
 				results = resultsAsContent,
 				onEditComplete = viewModel::onEditComplete,
 				onTextChange = viewModel::onContentChange,
+				onExport = viewModel::onExportFile,
+				fileSaverState = fileSaverState,
 				navigation = {
 					IconButton(onClick = navController::navigateUp) {
 						Icon(

@@ -41,4 +41,6 @@
   <string name="notification_ticker_text">Exporting File</string>
   <string name="notification_content_text">Exporting your file It May take some Time</string>
   <string name="download_icon_text">Export</string>
+  <string name="export_text_dialog_title">Do you want to export the text?</string>
+  <string name="export_text_dialog_text">Export of the recognized text will result in a text file,you can find the text file in documents directory of your phone</string>
 </resources>
