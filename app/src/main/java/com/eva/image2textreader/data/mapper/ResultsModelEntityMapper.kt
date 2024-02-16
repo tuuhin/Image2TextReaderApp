@@ -8,7 +8,6 @@ import kotlinx.datetime.LocalDateTime
 object ResultsModelEntityMapper {
 
 	fun toModel(entity: ResultsEntity): ResultsModel {
-
 		return ResultsModel(
 			id = entity.id,
 			text = entity.text,
@@ -24,7 +23,7 @@ object ResultsModelEntityMapper {
 			id = model.id ?: -1,
 			text = model.text,
 			computed_at = model.createdAt,
-			updated_at = LocalDateTime.now(),
+			updated_at = model.lastUpdated,
 			image_uri = imageUri,
 			language_code = model.languageCode,
 		)

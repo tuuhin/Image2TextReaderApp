@@ -26,14 +26,13 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.imageLoader
-import coil.request.ImageRequest
-import coil.size.Size
 import com.eva.image2textreader.R
 import com.eva.image2textreader.presentation.util.preview.BooleanPreviewParams
 import com.eva.image2textreader.ui.theme.Image2TextReaderTheme
@@ -57,18 +56,18 @@ fun SelectableCardImage(
 
 	Box(
 		modifier = modifier
-			.sizeIn(minWidth = 80.dp, minHeight = 80.dp)
+			.sizeIn(
+				minHeight = dimensionResource(id = R.dimen.card_image_min_size),
+				maxHeight = dimensionResource(id = R.dimen.card_image_max_size),
+			)
+			.aspectRatio(1f)
 			.graphicsLayer { rotationY = rotateYAnimation },
 		contentAlignment = Alignment.Center
 	) {
 		if (rotateYAnimation >= 90f) {
 			imageUri?.let { uri ->
 				AsyncImage(
-					model = ImageRequest.Builder(context)
-						.data(uri)
-						.crossfade(true)
-						.size(Size(80, 80))
-						.build(),
+					model = uri,
 					contentDescription = null,
 					imageLoader = context.imageLoader,
 					contentScale = ContentScale.Crop,

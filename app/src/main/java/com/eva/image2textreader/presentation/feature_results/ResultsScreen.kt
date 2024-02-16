@@ -1,13 +1,17 @@
 package com.eva.image2textreader.presentation.feature_results
 
-import android.content.Context
-import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -20,9 +24,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -38,33 +41,34 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import com.eva.image2textreader.R
 import com.eva.image2textreader.domain.models.ResultsModel
 import com.eva.image2textreader.presentation.feature_results.composables.MultiPickerTopBar
 import com.eva.image2textreader.presentation.feature_results.composables.ResultsContent
 import com.eva.image2textreader.presentation.feature_results.composables.SavedResultsCard
 import com.eva.image2textreader.presentation.feature_results.util.ResultsState
+import com.eva.image2textreader.presentation.feature_results.util.SortResultsOption
 import com.eva.image2textreader.presentation.util.ShowContent
 import com.eva.image2textreader.presentation.util.compLocal.LocalSnackBarProvider
+import com.eva.image2textreader.presentation.util.contracts.ShareResultsActivityContracts
 import com.eva.image2textreader.presentation.util.preview.ResultsShowContentPreviewParams
 import com.eva.image2textreader.ui.theme.Image2TextReaderTheme
 
 @OptIn(
 	ExperimentalMaterial3Api::class,
 	ExperimentalLayoutApi::class,
-	ExperimentalFoundationApi::class
+	ExperimentalFoundationApi::class,
 )
 @Composable
 fun ResultsScreen(
 	results: ShowContent<List<ResultsState>>,
+	sortOrder: SortResultsOption,
 	onPickImage: (Uri?) -> Unit,
 	onLongClick: (ResultsModel) -> Unit,
 	onClick: (ResultsModel) -> Unit,
@@ -72,10 +76,10 @@ fun ResultsScreen(
 	onDeleteSelected: () -> Unit,
 	onUnSelectAll: () -> Unit,
 	onSelectAll: () -> Unit,
+	onSortOptionChange: (SortResultsOption) -> Unit,
 	modifier: Modifier = Modifier,
 	selectedCount: Int = 0,
 	snackBarHostState: SnackbarHostState = LocalSnackBarProvider.current,
-	context: Context = LocalContext.current
 ) {
 	val isAnyItemSelected by remember(selectedCount) {
 		derivedStateOf { selectedCount > 0 }
@@ -86,75 +90,58 @@ fun ResultsScreen(
 		onBack = onUnSelectAll,
 	)
 
-
 	val pickVisualImages = rememberLauncherForActivityResult(
 		contract = ActivityResultContracts.PickVisualMedia(),
 		onResult = onPickImage,
+	)
+
+	val shareResultsContract = rememberLauncherForActivityResult(
+		contract = ShareResultsActivityContracts(),
+		onResult = {}
 	)
 
 	val launchImagePicker: () -> Unit = {
 		val mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
 		pickVisualImages.launch(PickVisualMediaRequest(mediaType))
 	}
-	val onShareSelected: () -> Unit = {
 
-		val selectedUri = arrayListOf(*results.content
-			.filter { it.isSelected }
-			.mapNotNull { it.model.imageUri?.toUri() }
-			.toTypedArray()
-		)
-
-		val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
-			putParcelableArrayListExtra(
-				Intent.EXTRA_STREAM, selectedUri
-			)
-			type = "image/*"
-		}
-	}
-
-	val onShareResult: (ResultsModel) -> Unit = { result ->
-
-		val title = context.getString(R.string.computation_result, result.id ?: -1)
-
-		val intent = Intent(Intent.ACTION_SEND).apply {
-			putExtra(Intent.EXTRA_TITLE, title)
-			putExtra(Intent.EXTRA_TEXT, result.text)
-			flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-			setDataAndType(result.imageUri?.let(Uri::parse), "text/plain")
-		}
-
-		val intentChooser = Intent.createChooser(
-			intent,
-			context.getString(R.string.share_results_title)
-		)
-		context.startActivity(intentChooser)
-	}
+	val snackBarInserts = if (WindowInsets.areNavigationBarsVisible)
+		WindowInsets.systemBars else WindowInsets.statusBars
 
 	Scaffold(
 		topBar = {
 			MultiPickerTopBar(
+				sortOrder = sortOrder,
 				isItemSelected = isAnyItemSelected,
 				selectedCount = selectedCount,
 				onClearSelected = onUnSelectAll,
 				onDeleteSelected = onDeleteSelected,
 				onSelectAll = onSelectAll,
+				onSortOrderChange = onSortOptionChange,
 			)
 		},
 		floatingActionButton = {
-			ExtendedFloatingActionButton(
-				onClick = launchImagePicker,
-				contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-				elevation = FloatingActionButtonDefaults.elevation()
+			AnimatedVisibility(
+				visible = !isAnyItemSelected,
+				enter = slideInVertically() + fadeIn(),
+				exit = slideOutVertically() + fadeOut(),
+				label = "Is Pick Image Option Visible"
 			) {
-				Icon(
-					painter = painterResource(id = R.drawable.ic_image),
-					contentDescription = null,
-				)
-				Spacer(modifier = Modifier.width(4.dp))
-				Text(
-					text = stringResource(id = R.string.pick_image),
-					style = MaterialTheme.typography.bodyMedium
-				)
+				ExtendedFloatingActionButton(
+					onClick = launchImagePicker,
+					contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+					elevation = FloatingActionButtonDefaults.elevation()
+				) {
+					Icon(
+						painter = painterResource(id = R.drawable.ic_image),
+						contentDescription = null,
+					)
+					Spacer(modifier = Modifier.width(6.dp))
+					Text(
+						text = stringResource(id = R.string.pick_image),
+						style = MaterialTheme.typography.titleMedium
+					)
+				}
 			}
 		},
 		snackbarHost = {
@@ -168,24 +155,20 @@ fun ResultsScreen(
 			}
 		},
 		modifier = modifier,
-		contentWindowInsets = if (WindowInsets.areNavigationBarsVisible)
-			WindowInsets.systemBars else WindowInsets.statusBars,
+		contentWindowInsets = snackBarInserts,
 	) { scPadding ->
 		ResultsContent(
 			results = results,
 			modifier = Modifier.padding(scPadding)
 		) { content ->
-			// TODO: If later check if multiple screen size required
-			LazyVerticalGrid(
-				columns = GridCells.Adaptive(300.dp),
+			LazyColumn(
 				contentPadding = PaddingValues(dimensionResource(R.dimen.scaffold_padding)),
 				verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.results_spacing)),
-				horizontalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.results_spacing)),
 				modifier = Modifier.fillMaxSize()
 			) {
 				itemsIndexed(
 					items = content,
-					key = { idx, _ -> idx },
+					key = { _, item -> item.model.id ?: -1L },
 				) { _, item ->
 					SavedResultsCard(
 						model = item.model,
@@ -197,7 +180,7 @@ fun ResultsScreen(
 							//callback for onclick on the model
 							else onClick(item.model)
 						},
-						onShare = { onShareResult(item.model) },
+						onShare = { shareResultsContract.launch(item.model) },
 						onDelete = { onDeleteResult(item.model) },
 						modifier = Modifier
 							.animateContentSize()
@@ -206,11 +189,17 @@ fun ResultsScreen(
 				}
 			}
 		}
-
 	}
 }
 
-@PreviewLightDark
+@Preview(
+	apiLevel = 33,
+	uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL
+)
+@Preview(
+	apiLevel = 33,
+	uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
 @Composable
 fun ResultsScreenPreview(
 	@PreviewParameter(ResultsShowContentPreviewParams::class)
@@ -218,6 +207,7 @@ fun ResultsScreenPreview(
 ) = Image2TextReaderTheme {
 	ResultsScreen(
 		results = results,
+		sortOrder = SortResultsOption.TIME_OF_CREATE,
 		onPickImage = {},
 		onClick = {},
 		onLongClick = {},
@@ -225,6 +215,7 @@ fun ResultsScreenPreview(
 		onDeleteSelected = {},
 		onDeleteResult = {},
 		onSelectAll = {},
+		onSortOptionChange = {},
 		snackBarHostState = SnackbarHostState()
 	)
 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.eva.image2textreader.domain.models.ResultsModel
 import com.eva.image2textreader.domain.repository.ResultHistoryRepo
 import com.eva.image2textreader.presentation.feature_results.util.ResultsState
+import com.eva.image2textreader.presentation.feature_results.util.SortResultsOption
 import com.eva.image2textreader.presentation.util.ShowContent
 import com.eva.image2textreader.util.Resource
 import com.eva.image2textreader.util.UiEvents
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -26,25 +28,35 @@ class ResultsViewModel(
 ) : ViewModel() {
 
 	private val _savedResultsState = MutableStateFlow<List<ResultsState>>(emptyList())
-
 	private val _isLoading = MutableStateFlow(true)
 
-	val savedResults = combine(_savedResultsState, _isLoading) { results, loading ->
-		ShowContent(isLoading = loading, content = results)
-	}.stateIn(
-		viewModelScope,
-		SharingStarted.WhileSubscribed(2000L),
-		ShowContent(content = emptyList())
-	)
+	private val _sortOption = MutableStateFlow(SortResultsOption.TIME_OF_CREATE)
+	val sortOrder = _sortOption.asStateFlow()
+
+	val savedResults =
+		combine(_savedResultsState, _isLoading, _sortOption) { results, loading, sortOrder ->
+			val sortedResults = when (sortOrder) {
+				SortResultsOption.TIME_OF_CREATE -> results.sortedByDescending { it.model.createdAt }
+				SortResultsOption.TIME_OF_UPDATE -> results.sortedByDescending { it.model.lastUpdated }
+			}
+			ShowContent(isLoading = loading, content = sortedResults)
+		}.stateIn(
+			scope = viewModelScope,
+			started = SharingStarted.WhileSubscribed(2000L),
+			initialValue = ShowContent(content = emptyList())
+		)
 
 	val selectedResults = _savedResultsState
 		.map { savedResults -> savedResults.filter(ResultsState::isSelected) }
-		.stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+		.stateIn(
+			scope = viewModelScope,
+			started = SharingStarted.Lazily,
+			initialValue = emptyList()
+		)
 
 	private val _uiEvents = MutableSharedFlow<UiEvents>()
 	val uiEvents = _uiEvents.asSharedFlow()
 
-	private var _lastDeleted: ResultsModel? = null
 
 	fun clearAllSelection() = _savedResultsState.update { states ->
 		states.map { state -> state.copy(isSelected = false) }
@@ -56,56 +68,42 @@ class ResultsViewModel(
 
 	fun onSelectResult(model: ResultsModel) = _savedResultsState.update { states ->
 		states.map { state ->
-			if (state.model == model)
-				state.copy(isSelected = !state.isSelected)
+			if (state.model == model) state.copy(isSelected = !state.isSelected)
 			else state
 		}
 	}
+
+	fun onSortOrderChange(order: SortResultsOption) = _sortOption.update { order }
 
 	init {
 		setUpHistory()
 	}
 
-	private fun setUpHistory() {
-		historyRepo.resultsFlow()
-			.onEach { res ->
-				_isLoading.update { res is Resource.Loading }
-				when (res) {
-					is Resource.Error -> _uiEvents
-						.emit(UiEvents.ShowSnackBar(text = res.message))
+	private fun setUpHistory() = viewModelScope.launch {
+		historyRepo.resultsFlow().onEach { res ->
+			// Is Content Loading
+			_isLoading.update { res is Resource.Loading }
 
-					is Resource.Success -> _savedResultsState
-						.update { res.data.map(::ResultsState) }
+			when (res) {
+				is Resource.Error -> _uiEvents.emit(UiEvents.ShowSnackBar(text = res.message))
 
-					else -> {}
-				}
+				is Resource.Success -> _savedResultsState.update { res.data.map(::ResultsState) }
 
-			}.launchIn(viewModelScope)
-	}
-
-	private fun addLastDeleted() = _lastDeleted?.let { result ->
-		viewModelScope.launch {
-			when (val results = historyRepo.updateResult(result)) {
-				is Resource.Error -> _uiEvents.emit(UiEvents.ShowToast(results.message))
 				else -> {}
 			}
-		}
+
+		}.launchIn(this)
 	}
 
-
 	fun onDeleteResult(model: ResultsModel) = viewModelScope.launch {
-		_lastDeleted = model
 		when (val results = historyRepo.deleteResult(model)) {
 			is Resource.Error -> _uiEvents.emit(UiEvents.ShowToast(results.message))
 
-			is Resource.Success -> _uiEvents
-				.emit(
-					UiEvents.ShowSnackBar(
-						"Deleted Result Successfully",
-						actionLabel = "UNDO",
-						action = ::addLastDeleted,
-					)
+			is Resource.Success -> _uiEvents.emit(
+				UiEvents.ShowSnackBar(
+					text = "Deleted Result Successfully",
 				)
+			)
 
 			else -> {}
 		}
@@ -113,21 +111,17 @@ class ResultsViewModel(
 
 
 	fun onDeleteSelected() = viewModelScope.launch {
-		val resultsTobedeleted = _savedResultsState.value
-			.filter { it.isSelected }
-			.map(ResultsState::model)
+
+		val resultsTobedeleted =
+			_savedResultsState.value.filter(ResultsState::isSelected).map(ResultsState::model)
 
 		when (val results = historyRepo.deleteResults(resultsTobedeleted)) {
-			is Resource.Error -> _uiEvents.emit(
-				UiEvents.ShowSnackBar(text = results.message)
-			)
+			is Resource.Error -> _uiEvents.emit(UiEvents.ShowSnackBar(text = results.message))
 
-			is Resource.Success -> _uiEvents
-				.emit(UiEvents.ShowToast("Deleted Results Successfully"))
+			is Resource.Success -> _uiEvents.emit(UiEvents.ShowToast("Deleted Results Successfully"))
 
 			else -> {}
 		}
 	}
-
 
 }

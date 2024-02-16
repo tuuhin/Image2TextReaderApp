@@ -43,4 +43,9 @@
   <string name="export_icon_desc">Export</string>
   <string name="export_text_dialog_title">Export Text</string>
   <string name="export_text_dialog_text">Export the recognized text ,the result can be found the text file in documents directory of your phone</string>
+  <string name="sort_results_title">Sort Results</string>
+  <string name="sort_results_text">Sort the available results in a orderly manner</string>
+  <string name="time_of_create">Time of Creation</string>
+  <string name="time_of_update">Time of Update</string>
+  <string name="sort_results">Sort Results</string>
 </resources>

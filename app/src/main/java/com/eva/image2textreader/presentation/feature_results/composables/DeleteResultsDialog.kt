@@ -15,6 +15,7 @@ import com.eva.image2textreader.ui.theme.Image2TextReaderTheme
 
 @Composable
 fun DeleteResultsDialog(
+	isVisible: Boolean,
 	title: String,
 	text: String,
 	onConfirm: () -> Unit,
@@ -22,6 +23,8 @@ fun DeleteResultsDialog(
 	modifier: Modifier = Modifier,
 	properties: DialogProperties = DialogProperties()
 ) {
+	if (!isVisible) return
+
 	AlertDialog(
 		onDismissRequest = onDisMiss,
 		confirmButton = {
@@ -42,8 +45,8 @@ fun DeleteResultsDialog(
 				Text(text = stringResource(id = R.string.dialog_cancel_text))
 			}
 		},
-		title = { Text(text = text) },
-		text = { Text(text = title) },
+		title = { Text(text = title) },
+		text = { Text(text = text) },
 		textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
 		titleContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
 		modifier = modifier,
@@ -56,6 +59,7 @@ fun DeleteResultsDialog(
 @Composable
 fun DeleteResultsDialogPreview() = Image2TextReaderTheme {
 	DeleteResultsDialog(
+		isVisible = true,
 		title = stringResource(id = R.string.delete_current_confirm_title),
 		text = stringResource(id = R.string.delete_current_confirm_text),
 		onConfirm = { },

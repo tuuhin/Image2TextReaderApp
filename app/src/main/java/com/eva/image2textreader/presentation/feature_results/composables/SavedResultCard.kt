@@ -1,5 +1,8 @@
 package com.eva.image2textreader.presentation.feature_results.composables
 
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,11 +26,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import com.eva.image2textreader.R
 import com.eva.image2textreader.domain.models.ResultsModel
@@ -50,6 +56,7 @@ fun SavedResultsCard(
 	containerColor: Color = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp),
 	selectedContainerColor: Color = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp),
 	shape: Shape = MaterialTheme.shapes.medium,
+	density: Density = LocalDensity.current,
 ) {
 	val isActionEnabled by remember(isSelected) {
 		derivedStateOf { !isSelected }
@@ -57,32 +64,50 @@ fun SavedResultsCard(
 
 	var showDialog by remember { mutableStateOf(false) }
 
-	if (showDialog) {
-		DeleteResultsDialog(
-			title = stringResource(id = R.string.delete_current_confirm_title),
-			text = stringResource(id = R.string.delete_current_confirm_text),
-			onConfirm = {
-				onDelete()
-				showDialog = false
-			},
-			onDisMiss = { showDialog = false },
-		)
+
+	DeleteResultsDialog(
+		isVisible = showDialog,
+		title = stringResource(id = R.string.delete_current_confirm_title),
+		text = stringResource(id = R.string.delete_current_confirm_text),
+		onConfirm = {
+			onDelete()
+			showDialog = false
+		},
+		onDisMiss = { showDialog = false },
+	)
+
+
+	val isSelectedTransition = updateTransition(
+		targetState = isSelected,
+		label = "Is Card Selected"
+	)
+
+	val cardContainerColor by isSelectedTransition.animateColor(label = "Card Container Color") {
+		if (it) containerColor else selectedContainerColor
+	}
+
+	val cardElevation by isSelectedTransition.animateFloat(label = "Card Elevation") {
+		with(density) {
+			if (it) 8.dp.toPx() else 2.dp.toPx()
+		}
 	}
 
 	Card(
 		colors = CardDefaults.cardColors(
-			containerColor = if (isSelected) selectedContainerColor else containerColor,
+			containerColor = cardContainerColor,
 			contentColor = contentColor,
 		),
-		elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
 		shape = shape,
 		modifier = modifier
 			.clip(shape)
-			.combinedClickable(onClick = onClick, onLongClick = onLongClick),
+			.combinedClickable(onClick = onClick, onLongClick = onLongClick)
+			.graphicsLayer {
+				shadowElevation = cardElevation
+			},
 	) {
 		Row(
 			horizontalArrangement = Arrangement.spacedBy(16.dp),
-			verticalAlignment = Alignment.CenterVertically,
+			verticalAlignment = Alignment.Top,
 			modifier = Modifier.padding(all = dimensionResource(id = R.dimen.card_internal_padding)),
 		) {
 			SelectableCardImage(

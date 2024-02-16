@@ -1,5 +1,6 @@
 package com.eva.image2textreader.presentation.feature_results.composables
 
+import android.content.res.Configuration
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -14,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.eva.image2textreader.R
 import com.eva.image2textreader.presentation.feature_results.util.ResultsState
@@ -39,10 +40,13 @@ fun ResultsContent(
 				modifier = Modifier.fillMaxSize(),
 				contentAlignment = Alignment.Center
 			) {
-				CircularProgressIndicator(progress = .5f)
+				CircularProgressIndicator(
+					color = MaterialTheme.colorScheme.secondary,
+					trackColor = MaterialTheme.colorScheme.surfaceVariant,
+				)
 			}
 
-			!isLoading && results.content.isEmpty() -> NoResultsContainer(
+			results.content.isEmpty() -> NoResultsContainer(
 				modifier = Modifier
 					.fillMaxSize()
 					.padding(horizontal = dimensionResource(R.dimen.scaffold_padding))
@@ -54,7 +58,14 @@ fun ResultsContent(
 	}
 }
 
-@PreviewLightDark
+@Preview(
+	apiLevel = 33,
+	uiMode = Configuration.UI_MODE_NIGHT_NO or Configuration.UI_MODE_TYPE_NORMAL
+)
+@Preview(
+	apiLevel = 33,
+	uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
 @Composable
 fun ResultsContentPreview(
 	@PreviewParameter(ResultsShowContentPreviewParams::class)
@@ -62,7 +73,12 @@ fun ResultsContentPreview(
 ) = Image2TextReaderTheme {
 	Surface(color = MaterialTheme.colorScheme.surface) {
 		ResultsContent(results = content) {
-			Text(text = "Oke")
+			Box(
+				modifier = Modifier.fillMaxSize(),
+				contentAlignment = Alignment.Center
+			) {
+				Text(text = "With content")
+			}
 		}
 	}
 }

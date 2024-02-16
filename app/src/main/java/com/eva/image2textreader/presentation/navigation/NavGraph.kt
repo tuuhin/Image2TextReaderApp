@@ -2,7 +2,6 @@ package com.eva.image2textreader.presentation.navigation
 
 import android.content.Context
 import android.widget.Toast
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
@@ -32,7 +31,6 @@ import com.eva.image2textreader.presentation.util.compLocal.LocalSnackBarProvide
 import com.eva.image2textreader.util.UiEvents
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun NavigationGraph(
 	modifier: Modifier = Modifier,
@@ -55,6 +53,7 @@ fun NavigationGraph(
 
 			val savedResults by viewModel.savedResults.collectAsStateWithLifecycle()
 			val selectedResults by viewModel.selectedResults.collectAsStateWithLifecycle()
+			val sortOrder by viewModel.sortOrder.collectAsStateWithLifecycle()
 
 			LaunchedEffect(key1 = lifeCycleOwner) {
 				lifeCycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -82,21 +81,25 @@ fun NavigationGraph(
 
 			ResultsScreen(
 				results = savedResults,
+				sortOrder = sortOrder,
+				selectedCount = selectedResults.size,
 				onPickImage = { uri ->
 					uri?.let {
 						Screens.ResultsScreen.navigateToRecognizeScreen(navController, uri)
 					}
 				},
-				onClick = {
-					// TODO: Check the Id Before moving
-					Screens.ResultsScreen.navigateToEditScreen(navController, it.id ?: -1)
+				onClick = { resultModel ->
+					val resultId = resultModel.id
+					if (resultId != null && resultId != -1L) {
+						Screens.ResultsScreen.navigateToEditScreen(navController, resultId)
+					}
 				},
 				onLongClick = viewModel::onSelectResult,
 				onUnSelectAll = viewModel::clearAllSelection,
-				selectedCount = selectedResults.size,
 				onDeleteSelected = viewModel::onDeleteSelected,
 				onDeleteResult = viewModel::onDeleteResult,
-				onSelectAll = viewModel::onSelectAll
+				onSelectAll = viewModel::onSelectAll,
+				onSortOptionChange = viewModel::onSortOrderChange
 			)
 		}
 

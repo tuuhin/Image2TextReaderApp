@@ -13,7 +13,8 @@ object RecognizerResultMapper {
 			text = model.wholeText,
 			lastUpdated = LocalDateTime.now(),
 			imageUri = image,
-			languageCode = model.languageCode
+			languageCode = model.languageCode,
+			createdAt = LocalDateTime.now()
 		)
 	}
 }
