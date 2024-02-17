@@ -63,7 +63,7 @@ fun EditScreenTopBar(
 				positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
 				tooltip = {
 					PlainTooltip(caretProperties = TooltipDefaults.caretProperties) {
-						Text(text = stringResource(id = R.string.download_icon_text))
+						Text(text = stringResource(id = R.string.export_icon_desc))
 					}
 				},
 				state = rememberTooltipState()

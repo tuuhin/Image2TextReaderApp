@@ -15,7 +15,7 @@ DELETE FROM resultsEntity
 WHERE `id` IN ?;
 
 insetResult:
-INSERT INTO resultsEntity (
+INSERT  OR IGNORE INTO resultsEntity (
 `id`,`text`,`image_uri`,`computed_at` ,`updated_at`,`language_code` )
 VALUES( ?,?,?,?,?,?);
 

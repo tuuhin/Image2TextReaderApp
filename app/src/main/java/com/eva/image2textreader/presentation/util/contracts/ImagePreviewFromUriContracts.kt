@@ -9,12 +9,14 @@ import com.eva.image2textreader.R
 class ImagePreviewFromUriContracts : ActivityResultContract<Uri, Unit>() {
 
 	override fun createIntent(context: Context, input: Uri): Intent {
-		val intent = Intent(Intent.ACTION_VIEW).apply {
-			setDataAndType(input, "image/*")
-			putExtra(Intent.EXTRA_TITLE, "Image Preview")
-			flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-		}
 		val chooserTitle = context.getString(R.string.image_preview_title)
+
+		val intent = Intent(Intent.ACTION_VIEW)
+			.apply {
+				setDataAndType(input, "image/*")
+				putExtra(Intent.EXTRA_TITLE, chooserTitle)
+				flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+			}
 
 		return Intent.createChooser(intent, chooserTitle)
 	}

@@ -35,16 +35,16 @@
   <string name="edit_confirm_dialog_title">Have you completed your changes?</string>
   <string name="edit_confirm_dialog_text">"Are the changes to the recognized text are completed "</string>
   <string name="dialog_done_text">Done</string>
-  <string name="image_preview_title">Preview Image With</string>
+  <string name="image_preview_title">Image Preview</string>
 
   <string name="notification_title">Export</string>
   <string name="notification_ticker_text">Exporting File</string>
   <string name="notification_content_text">Exporting your file It May take some Time</string>
   <string name="export_icon_desc">Export</string>
   <string name="export_text_dialog_title">Export Text</string>
-  <string name="export_text_dialog_text">Export the recognized text ,the result can be found the text file in documents directory of your phone</string>
+  <string name="export_text_dialog_text">Export the recognized text, the result can be found the text file in documents directory of your phone</string>
   <string name="sort_results_title">Sort Results</string>
-  <string name="sort_results_text">Sort the available results in a orderly manner</string>
+  <string name="sort_results_text">Sort the available results in an orderly manner</string>
   <string name="time_of_create">Time of Creation</string>
   <string name="time_of_update">Time of Update</string>
   <string name="sort_results">Sort Results</string>
